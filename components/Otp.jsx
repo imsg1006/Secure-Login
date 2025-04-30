@@ -3,13 +3,29 @@ import React from "react";
 import { Label } from "../components/ui/Label";
 import { Input } from "../components/ui/SignUp"; // Assuming you're using this Input component
 import { cn } from "../lib/utils";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export function VerifyOtpForm() {
-  const handleVerify = (e) => {
-    e.preventDefault();
-    console.log("OTP verification submitted");
-  };
+  const [email, setEmail] = useState(localStorage.getItem("loginEmail") || "");
+  const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
 
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:8080/api/auth/verify-login-otp", {
+        email,
+        otp,
+      });
+      console.log("OTP verified:", response.data);
+      const name = response.data.name;
+      navigate("/welcome", { state: { name } });
+    } catch (error) {
+      console.error("OTP verification failed:", error.response?.data || error.message);
+    }
+  };
   return (
     <div className="shadow-input border-white border-2 bg-[#1c1c1c] mt-20 mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 dark:bg-black">
       <div className="text-center">
@@ -29,6 +45,8 @@ export function VerifyOtpForm() {
             placeholder="Enter your OTP"
             type="text"
             maxLength={6}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
           />
         </LabelInputContainer>
 

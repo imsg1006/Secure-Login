@@ -3,12 +3,37 @@ import React from "react";
 import { Label } from "../components/ui/Label";
 import { Input } from "../components/ui/SignUp"
 import { cn } from "../lib/utils";
- 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export function SignupFormDemo() {
-  const handleSubmit = (e) => {
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+  
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted");
+    try {
+      await axios.post("http://localhost:8080/api/auth/register", formData);
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert("Registration failed. Try again.");
+    }
   };
   return (<div
     className="shadow-input border-white border-2 bg-[#1c1c1c] mt-20 mx-auto w-full max-w-md rounded-none p-4 md:rounded-2xl md:p-8 dark:bg-black"
@@ -16,36 +41,31 @@ export function SignupFormDemo() {
     {/* Center only the header and paragraph */}
     <div className="text-center">
       <h2 className="text-xl font-bold text-white">
-        Welcome to Secure Login 
+        Welcome to Secure Login
       </h2>
       <p className="mt-2 max-w-sm text-sm text-white dark:text-neutral-300 mx-auto">
         A demo application which implements 2-Factor Authentication
       </p>
     </div>
   
-    <form className="my-8">
+    <form className="my-8" onSubmit={handleSubmit}>
       <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
         <LabelInputContainer className="w-full text-left">
           <Label className="text-white" htmlFor="firstname">Your Name</Label>
-          <Input id="firstname" placeholder="name" type="text" />
+          <Input id="name" placeholder="name" type="text" value={formData.name} onChange={handleChange} />
         </LabelInputContainer>
       </div>
   
       <LabelInputContainer className="mb-4 text-left">
         <Label className="text-white" htmlFor="email">Email Address</Label>
-        <Input id="email" placeholder="your email" type="email" />
+        <Input id="email" placeholder="your email" type="email" value={formData.email} onChange={handleChange}/>
       </LabelInputContainer>
   
       <LabelInputContainer className="mb-4 text-left">
         <Label className="text-white" htmlFor="password">Password</Label>
-        <Input id="password" placeholder="your password" type="password" />
+        <Input id="password" placeholder="your password" type="password" value={formData.password} onChange={handleChange}/>
       </LabelInputContainer>
   
-      <LabelInputContainer className="mb-8 text-left">
-        <Label className="text-white" htmlFor="twitterpassword">Confirm password</Label>
-        <Input id="twitterpassword" placeholder="re-enter your password" type="password" />
-      </LabelInputContainer>
-
         <button
           className="group/btn relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-600 font-medium text-white shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:bg-zinc-800 dark:from-zinc-900 dark:to-zinc-900 dark:shadow-[0px_1px_0px_0px_#27272a_inset,0px_-1px_0px_0px_#27272a_inset]"
           type="submit">
@@ -55,7 +75,7 @@ export function SignupFormDemo() {
 
         <h1 className="text-white mt-4 text-center">
             Already have an Account?{" "}
-  <a className="text-blue-200 hover:text-blue-400" href="">Login</a>
+  <a className="text-blue-200 hover:text-blue-400" href="/login">Login</a>
 </h1>
 
          </form>

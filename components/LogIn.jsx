@@ -3,11 +3,37 @@ import React from "react";
 import { Label } from "../components/ui/Label";
 import { Input } from "../components/ui/SignUp"; // Assuming Input is reused
 import { cn } from "../lib/utils";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
 
 export function LoginFormDemo() {
-  const handleLogin = (e) => {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Login form submitted");
+    setError("");
+
+    try {
+      const response = await axios.post("http://localhost:8080/api/auth/login", {
+        email,
+        password,
+      });
+
+      const data = response.data;
+      console.log("Login Success:", data);
+      localStorage.setItem("loginEmail", email);
+      // Navigate to OTP verification page
+      navigate("/otp");
+
+    } catch (err) {
+      console.error("Login Error:", err.response?.data || err.message);
+      setError(err.response?.data || "Login failed. Try again.");
+    }
   };
 
   return (
@@ -24,12 +50,12 @@ export function LoginFormDemo() {
       <form className="my-8" onSubmit={handleLogin}>
         <LabelInputContainer className="mb-4 text-left">
           <Label className="text-white" htmlFor="email">Email Address</Label>
-          <Input id="email" placeholder="your email" type="email" />
+          <Input id="email" placeholder="your email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}/>
         </LabelInputContainer>
 
         <LabelInputContainer className="mb-8 text-left">
           <Label className="text-white" htmlFor="password">Password</Label>
-          <Input id="password" placeholder="your password" type="password" />
+          <Input id="password" placeholder="your password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}/>
         </LabelInputContainer>
 
         <button
@@ -41,7 +67,7 @@ export function LoginFormDemo() {
         </button>
         <h1 className="text-white mt-4 text-center">
             Don't have an Account?{" "}
-  <a className="text-blue-200 hover:text-blue-400" href="">Register</a>
+  <a className="text-blue-200 hover:text-blue-400" href="/register">Register</a>
 </h1>
       </form>
     </div>
